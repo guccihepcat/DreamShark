@@ -1,6 +1,6 @@
 pragma solidity ^0.4.17;
 
-contract CampaignFactory {
+//contract CampaignFactory {
     
 contract Campaign {
     
@@ -10,13 +10,13 @@ contract Campaign {
         address recipient;
         bool complete;
         uint approvalCount;
-        mapping (address => bool) public approvals;
+        mapping (address => bool) approvals;
     }
     
     Request[] public requests;
     address public manager;
     uint public minimumContribution;
-    mapping (address => bool) public approvers;
+    mapping (address => bool) approvers;
     uint public approversCount;
     
     modifier restricted() {
@@ -41,11 +41,20 @@ contract Campaign {
            value: value,
            recipient: recipient,
            complete: false,
-           approvalCount: 0;
+           approvalCount: 0
         });
         requests.push(newRequest);
     }
     
     function approveRequest(uint index) public restricted {
+        require(approvers[msg.sender]);
+        require(!requests[index].approvals[msg.sender]);
+        
+        requests.approvals[msg.sender] = true;
+        requests.approvalCount++;
+    }
+    
+    function finalizeRequest(uint index) public restricted {
         
     }
+}
