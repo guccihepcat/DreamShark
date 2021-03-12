@@ -31,6 +31,7 @@ contract Campaign {
     
     function contribute() public payable {
         require(msg.value > minimumContribution);
+        
         approvers[msg.sender] = true;
         approversCount++;
     }
@@ -47,14 +48,22 @@ contract Campaign {
     }
     
     function approveRequest(uint index) public restricted {
-        require(approvers[msg.sender]);
-        require(!requests[index].approvals[msg.sender]);
+        Request storage request = requests[index];
         
-        requests.approvals[msg.sender] = true;
-        requests.approvalCount++;
+        require(approvers[msg.sender]);
+        require(!request.approvals[msg.sender]);
+        
+        request.approvals[msg.sender] = true;
+        request.approvalCount++;
     }
     
     function finalizeRequest(uint index) public restricted {
+        Request storage request = requests[index];
         
+        require(request.approvalCount > (approversCount / 2));
+        require(!request.complete);
+        
+        request.recipient.transfer(request.value);
+        request.complete =  true;
     }
 }
